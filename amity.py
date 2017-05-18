@@ -107,7 +107,8 @@ class Amity():
             for person in room.room_occupants:
                 if person == person_name:
                     room.room_occupants.remove(person_name)
-                    cprint("{} sucessfully removed from previous office".format(person_name), "cyan")
+                    cprint("{} sucessfully removed from previous office".format
+                           (person_name), "cyan")
                     return
         if person_name in self.waiting_list['office']:
             self.waiting_list['office'].remove(person_name)
@@ -140,13 +141,13 @@ class Amity():
                     for person in room.room_occupants:
                         # checks if person already exists in the new office
                         if person.person_name == person_name:
-                            cprint("Person {} does not exist".format(
-                                   person_name), "red")
+                            cprint("{} already exists in the room {}".format(
+                                   person_name, new_room_name), "red")
                             return
-                            # reallocate a person and call function
-                            # remove_person_from_previous_office
-                            # to remove the staff from the previous
-                            # office or waiting list
+                    # reallocate a person and call function
+                    # remove_person_from_previous_office
+                    # to remove the staff from the previous
+                    # office or waiting list
                     if len(room.room_occupants) < 6:
                         self.remove_person_from_previous_office(person_name)
                         room.room_occupants.append(person_name)
@@ -166,32 +167,33 @@ class Amity():
     def reallocate_fellow(self, person_name, new_room_name):
         """ Reallocate a fellow to a different office or living space """
         try:
-            for room in self.all_rooms['office'] + self.all_rooms['livingspace']:
+            for room in self.all_rooms['office'] + self.all_rooms[
+                                                               'livingspace']:
                 if room.room_name == new_room_name and room.room_type == "office":
-                    for person in room.room_occupants:
-                        if person == person_name:
+                    for name in room.room_occupants:
+                        # checks if person already exists in the new office
+                        if name == person_name:
                             cprint("{} already exists in the room {}".format(
                                    person_name, new_room_name), "red")
                             return
                     if len(room.room_occupants) < 6:
                         self.remove_person_from_previous_office(person_name)
                         room.room_occupants.append(person_name)
-                        cprint("{} has been reallocated successfully to office {}".format(person_name, new_room_name), "cyan")
+                        cprint("{} has been reallocated successfully to office {}"
+                               .format(person_name, new_room_name), "cyan")
                         return
                     else:
                         cprint("Office {} is full, choose another room".format(
                                new_room_name), "red")
-                        return
                 elif room.room_name == new_room_name and room.room_type == "livingspace":
-                    for person in room.room_occupants:
-
-                        if person == person_name:
+                    for name in room.room_occupants:
+                        if name == person_name:
                             cprint("{} already exists in the room {}"
                                    .format(person_name, new_room_name), "red")
                             return
                     if len(room.room_occupants) < 4:
                         self.remove_person_from_previous_livingspace(
-                                                                 person_name)
+                                                                person_name)
                         room.room_occupants.append(person_name)
                         cprint("{} has been reallocated successfully to livingspace {}".format(person_name,
                                new_room_name), "cyan")
@@ -199,6 +201,7 @@ class Amity():
                     else:
                         cprint("Livingspace {} is full, choose another room".format(new_room_name), "red")
                         return
+                    return
                 else:
                     cprint("The room {} does not exist".format(
                            new_room_name), "red")
