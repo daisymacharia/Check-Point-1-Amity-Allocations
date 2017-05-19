@@ -28,7 +28,7 @@ import cmd
 from docopt import docopt, DocoptExit
 from pyfiglet import Figlet, figlet_format
 from termcolor import colored, cprint
-from amity import Amity
+from amity.amity import Amity
 
 
 def docopt_cmd(func):
@@ -82,9 +82,12 @@ class Amity(cmd.Cmd):
         person_type = args['<person_type>'].upper()
         first_name = args['<first_name>'].upper()
         last_name = args['<last_name>'].upper()
-        want_accommodation = args['<want_accomodation>'].upper
         person_name = first_name + " " + last_name
-        self.amity.add_person(person_type, person_name, want_accommodation)
+        if args['<want_accomodation>']:
+            want_accomodation = args['<want_accomodation>'].upper()
+        else:
+            want_accomodation = "N"
+        self.amity.add_person(person_type, person_name, want_accomodation)
 
     @docopt_cmd
     def do_reallocate_person(self, args):
