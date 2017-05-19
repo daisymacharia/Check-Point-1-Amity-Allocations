@@ -4,10 +4,9 @@ python:
   - "3.6"
 # command to install dependencies
 install: "pip install -r requirements.txt"
-
-# --source specifies what packages to cover, you probably want to use that option
+# command to run tests
 script:
-  coverage run --source="system/","tests/" -m unittest
+  coverage run -m unittest
 
 after_success:
   coveralls
