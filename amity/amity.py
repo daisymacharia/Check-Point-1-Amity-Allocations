@@ -70,7 +70,7 @@ class Amity():
         elif room_type not in ["LIVINGSPACE" ''"OFFICE"]:
             cprint("Invalid room type", "red")
 
-    def add_person(self, person_type, person_name, want_accomodation="N"):
+    def add_person(self, person_type, person_name, want_accomodation=""):
         """ adds a new person whether staff or fellow """
         # check if person exists in the system
         for person in self.all_people['staff'] + self.all_people['fellow']:
@@ -161,8 +161,8 @@ class Amity():
                 elif room.room_name == new_room_name and room.room_type == "livingspace":
                         cprint("Cannot reallocate a staff member to a living space", "red")
                         return
-        except Value:
-            cprint("{} does not exist".format(person_name), "red")
+        except ValueError:
+            cprint("Wrong inputs", "red")
 
     def reallocate_fellow(self, person_name, new_room_name):
         """ Reallocate a fellow to a different office or living space """
@@ -185,6 +185,7 @@ class Amity():
                     else:
                         cprint("Office {} is full, choose another room".format(
                                new_room_name), "red")
+                        return
                 elif room.room_name == new_room_name and room.room_type == "livingspace":
                     for name in room.room_occupants:
                         if name == person_name:
@@ -192,8 +193,7 @@ class Amity():
                                    .format(person_name, new_room_name), "red")
                             return
                     if len(room.room_occupants) < 4:
-                        self.remove_person_from_previous_livingspace(
-                                                                person_name)
+                        self.remove_person_from_previous_livingspace(person_name)
                         room.room_occupants.append(person_name)
                         cprint("{} has been reallocated successfully to livingspace {}".format(person_name,
                                new_room_name), "cyan")
@@ -201,12 +201,8 @@ class Amity():
                     else:
                         cprint("Livingspace {} is full, choose another room".format(new_room_name), "red")
                         return
-                    return
-                else:
-                    cprint("The room {} does not exist".format(
-                           new_room_name), "red")
         except ValueError:
-            cprint("{} does not exist".format(person_name), "red")
+            cprint("Wrong inputs", "red")
 
     def reallocate_person(self, person_name, new_room_name):
         """ Reallocate a person to a different office or living space """
@@ -249,16 +245,16 @@ class Amity():
             allocated into rooms """
         try:
             if filename:
-                filepath = 'files/' + filename + '.txt'
-                print_unallocated_file = open(filepath, 'w')
+                # filepath = '/files/' + filename + '.txt'
+                print_unallocated_file = open(filename, 'w')
                 for person in self.waiting_list['office'] + self.waiting_list['livingspace']:
-                    print_unallocated_file.write(person.person_name + '\n')
+                    print_unallocated_file.write(person + '\n')
                 print_unallocated_file.close()
                 cprint('\t\t Printing to {} completed'.format(
-                       filepath), "white")
+                       filename), "white")
             else:
                 for person in self.waiting_list['office'] + self.waiting_list['livingspace']:
-                    cprint(person.person_name, "yellow")
+                    cprint(person, "yellow")
         except ValueError:
             cprint("An error occured while printing. Please try again", "red")
 
