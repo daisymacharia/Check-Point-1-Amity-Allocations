@@ -4,3 +4,4 @@ daisy/
 .vscode
 .git
 .DS_Store
+.coverage
