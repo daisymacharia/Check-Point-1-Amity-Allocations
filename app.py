@@ -12,6 +12,8 @@ Usage:
     app print_unallocated [<filename>]
     app reallocate_person <person_identifier> <new_room_name>
     app print_allocated [<filename>]
+    app delete_person <first_name> <last_name>
+    app delete_room <room_name>
     app (-i | --interactive)
     app (-h | --help)
 
@@ -78,7 +80,8 @@ class Amity(cmd.Cmd):
 
     @docopt_cmd
     def do_add_person(self, args):
-        """Usage: add_person <person_type> <first_name> <last_name> [<want_accomodation>]"""
+        """Usage: add_person <person_type> <first_name> <last_name>
+           [<want_accomodation>]"""
         person_type = args['<person_type>'].upper()
         first_name = args['<first_name>'].upper()
         last_name = args['<last_name>'].upper()
@@ -123,6 +126,20 @@ class Amity(cmd.Cmd):
         """Usage: print_allocated [<filename>]"""
         filename = arg['<filename>'] or None
         self.amity.print_allocations(filename)
+
+    @docopt_cmd
+    def do_delete_person(self, args):
+        """Usage: delete_person <first_name> <last_name>"""
+        first_name = args['<first_name>'].upper()
+        last_name = args['<last_name>'].upper()
+        person_name = first_name + " " + last_name
+        self.amity.delete_person(person_name)
+
+    @docopt_cmd
+    def do_delete_room(self, args):
+        """Usage: delete_room <room_name>"""
+        room_name = args['<room_name>'].upper()
+        self.amity.delete_person(room_name)
 
     def do_quit(self, args):
 
