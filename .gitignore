@@ -5,3 +5,4 @@ daisy/
 .git
 .DS_Store
 .coverage
+venvdir/
