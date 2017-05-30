@@ -3,6 +3,10 @@ import random
 from amity.Model.person import Fellow, Staff
 from amity.Model.room import LivingSpace, Office
 from termcolor import cprint
+import pickle
+import sqlite3
+from os import remove
+from sqlite3 import Error
 import sys
 from os import path
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
@@ -83,6 +87,7 @@ class Amity():
         # add a new staff member
         if person_type == "STAFF":
             staff_object = Staff(person_name)
+            staff_object.person_id = "S" + "-" + str(staff_object.person_id)
             self.all_people['staff'].append(staff_object)
             cprint("Staff {} ID: {} added successfully".format(
                    staff_object.person_name,  staff_object.person_id), "cyan")
@@ -92,7 +97,7 @@ class Amity():
         # add a new fellow member
         elif person_type == "FELLOW":
             fellow_object = Fellow(person_name)
-            fellow_id = "F" + "-" + str(fellow_object.person_id)
+            fellow_object.person_id = "F" + "-" + str(fellow_object.person_id)
             self.all_people['fellow'].append(fellow_object)
             cprint("Fellow {} ID: {} added successfully".format(
                    fellow_object.person_name, fellow_object.person_id), "cyan")
@@ -116,7 +121,7 @@ class Amity():
                     return
         for person in self.waiting_list['office']:
             if person.person_id == p_id:
-                self.waiting_list['office'].remove(person_name)
+                self.waiting_list['office'].remove(person)
                 cprint("{} removed from waiting list".format(
                        person.person_name), "cyan")
 
@@ -133,7 +138,7 @@ class Amity():
                     return
         for person in self.waiting_list['livingspace']:
             if person.person_id == p_id:
-                self.waiting_list['livingspace'].remove(person_name)
+                self.waiting_list['livingspace'].remove(person)
                 cprint("{} removed from waiting list".format(
                        person.person_name), "cyan")
 
@@ -236,7 +241,7 @@ class Amity():
             adds them to the system """
         try:
             if filename:
-                filepath = 'amity/files/' + filename + '.txt'
+                filepath = 'files/' + filename + '.txt'
                 load_people_file = open(filepath)
                 for line in load_people_file.read().splitlines():
                     if len(line) == 0:
@@ -262,43 +267,45 @@ class Amity():
             allocated into rooms """
         try:
             if filename:
-                filepath = 'amity/files/' + filename + '.txt'
+                filepath = 'files/' + filename + '.txt'
                 print_unallocated_file = open(filepath, 'w')
                 for person in self.waiting_list['office']:
                     print_unallocated_file.write("UNALLOCATED TO OFFICES...\n")
-                    print_unallocated_file.write('*'*60)
-                    print_unallocated_file.write(',\t'. join(person.person_name))
+                    print_unallocated_file.write('*'*60 + '\n')
+                    print_unallocated_file.write('\t' + person.person_name + ',')
                 for person in self.waiting_list['livingspace']:
                     print_unallocated_file.write("UNALLOCATED TO LIVINGSPACES...\n")
                     print_unallocated_file.write('*'*60)
-                    print_unallocated_file.write(',\t'. join(person.person_name))
+                    print_unallocated_file.write('\t' + person.person_name + ',')
                 print_unallocated_file.close()
                 cprint('\t\t Printing to {} completed'.format(
                        filename), "white")
             else:
                 for person in self.waiting_list['office'] + \
                  self.waiting_list['livingspace']:
-                    cprint(person, "yellow")
+                    cprint(person.person_name, "yellow")
         except ValueError:
             cprint("An error occured while printing. Please try again", "red")
 
-    def print_room(self, room_name):
+    def print_room(self, roomname):
         """ print the room occupants in a specified room """
-        for room in self.all_rooms['office'] + self.all_rooms['livingspace']:
-            try:
-                if room.room_name == room_name:
-                    if room.room_occupants:
-                        cprint('{} NAME: {} \n'.format(room.room_type.upper(),
-                               room.room_name), "white")
-                        cprint('*'*60, "cyan")
-                        cprint(',\t'. join(room.room_occupants), "magenta")
-                        print('\n')
-                    else:
-                            cprint("There are no occupants in room {}"
-                                   .format(room.room_name), "red")
-                    return
-            except Exception:
-                cprint("Room {} does not exist".format(room_name), "red")
+        room = [room for room in self.all_rooms['office'] + self.all_rooms[
+                'livingspace'] if room.room_name == roomname]
+        members = [people for people in room[0].room_occupants]
+        if room:
+            if members:
+                cprint('{} NAME: {} \n'.format(room[0].room_type.upper(),
+                       room[0].room_name), "white")
+                cprint('*'*60, "cyan")
+                for person in members:
+                    cprint(',\t'.join(str(person.person_name)), "magenta")
+                print('\n')
+            else:
+                cprint("There are no occupants in room {}"
+                           .format(room[0].room_name), "red")
+                return
+        else:
+            cprint("Room {} does not exist".format(roomname), "red")
 
     def print_office_allocations(self):
         # checks if that the list has offices
@@ -321,15 +328,15 @@ class Amity():
     def print_allocations(self, filename=None):
         try:
             if filename:
-                filepath = 'amity/files/' + filename + '.txt'
+                filepath = 'files/' + filename + '.txt'
                 print_allocations_file = open(filepath, 'w')
                 print_allocations_file.write("OFFICES...\n")
                 for room in self.all_rooms['office']:
                     print_allocations_file.write('\n\t' + room.room_name +
-                                                 '\n' + '-' * 100 + '\n')
+                                                 '\n' + '-' * 90 + '\n')
                     if room.room_occupants:
                         for person in room.room_occupants:
-                            print_allocations_file.write('\t' + person + ',')
+                            print_allocations_file.write('\t' + person.person_name + ',')
                     else:
                         print_allocations_file.write("No occupants")
                     print_allocations_file.write('\n\n')
@@ -346,9 +353,11 @@ class Amity():
                 print_allocations_file.close()
                 cprint('\t\t Printing to {} complete'.format(
                        filename), "white")
+                return
             else:
                 self.print_office_allocations()
                 self.print_livingspace_allocations()
+                return
         except Exception:
             cprint("An error occured while printing. Please try again", "red")
 
@@ -377,8 +386,61 @@ class Amity():
             return "{} does not exist" .format(room_name)
 
 
-    def save_state():
-        pass
+    def save_state(self, db_file):
 
-    def load_state():
-        pass
+        """ Persists all the data stored in the app to an SQLite database
+        set the directory path
+        connect to the database
+        create a table if none exists and push the data to it
+        save all the data into the database
+        close the database connection
+        """
+
+        path = 'Database/'
+        db_connect = sqlite3.connect(path + db_file)
+        conn = db_connect.cursor()
+
+        conn.execute("CREATE TABLE IF NOT EXISTS all_data "
+                     "(dataID INTEGER PRIMARY KEY UNIQUE, "
+                     "all_rooms TEXT, all_people TEXT, waiting_list TEXT)")
+
+        all_rooms = pickle.dumps(Amity.all_rooms)
+        all_people = pickle.dumps(Amity.all_people)
+        waiting_list = pickle.dumps(Amity.waiting_list)
+
+        conn.execute("INSERT INTO all_data VALUES (null, ?, ?, ?);",
+                     (all_rooms, all_people, waiting_list))
+
+        db_connect.commit()
+        db_connect.close()
+
+        return 'Data successfully exported to Database'
+
+    def load_state(self, db_file):
+
+        """ Loads data from a database into the application
+        set the directory path
+        connect to the database
+        select all data from the database table
+        load the data into the application
+        close the database connection
+
+        """
+        try:
+            path = 'Database/'
+            db_connect = sqlite3.connect(path + db_file)
+            conn = db_connect.cursor()
+
+            conn.execute("SELECT * FROM all_data WHERE dataID = (SELECT MAX(dataID) FROM all_data)")
+            data = conn.fetchone()
+
+            Amity.all_rooms = pickle.loads(data[1])
+            Amity.all_people = pickle.loads(data[2])
+            Amity.waiting_list = pickle.loads(data[3])
+
+            db_connect.close()
+            return 'Successfully loaded data from the Database!'
+
+        except Error:
+            remove(path + db_file)
+            return "Database not found, Please check the name and try again!"
