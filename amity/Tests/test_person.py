@@ -1,6 +1,6 @@
 from io import StringIO
-from Controller.amity import Amity
-from Model.person import Fellow, Staff
+from amity.Controller.amity import Amity
+from amity.Model.person import Fellow, Staff
 import unittest
 import sys
 from os import path
@@ -16,6 +16,12 @@ class TestPeople(unittest.TestCase):
         self.held, sys.stdout = sys.stdout, StringIO()
         self.amity.all_people = {'staff': [], 'fellow': []}
         self.amity.all_rooms = {'livingspace': [], 'office': []}
+
+    def test_person_name_is_not_digit(self):
+        """Tests that the person name can only be a string"""
+        self.amity.add_person('STAFF', '456', 'N')
+        message = sys.stdout.getvalue().strip()
+        self.assertIn('Invalid name. Use letters only', message)
 
     def test_add_staff_member(self):
         """Tests that the length of the list_of_staff increases after
