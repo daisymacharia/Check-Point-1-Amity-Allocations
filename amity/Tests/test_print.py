@@ -24,7 +24,6 @@ class TestPeople(unittest.TestCase):
 
     def test_print_unallocated_people(self):
         """Tests that the unallocated people are printed on the screen"""
-        self.amity.create_room('OFFICE', 'test_office')
         self.amity.add_person('FELLOW', 'Wanjiru', 'N')
         self.amity.print_unallocated()
         message = sys.stdout.getvalue().strip()
