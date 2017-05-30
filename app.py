@@ -12,7 +12,9 @@ Usage:
     app print_unallocated [<filename>]
     app reallocate_person <person_identifier> <new_room_name>
     app print_allocated [<filename>]
-    app delete_person <first_name> <last_name>
+    app save_state <sqlite_database>
+    app load_state <sqlite_database>
+    app delete_person <person_identifier>
     app delete_room <room_name>
     app (-i | --interactive)
     app (-h | --help)
@@ -130,12 +132,20 @@ class Amity(cmd.Cmd):
         self.amity.print_allocations(filename)
 
     @docopt_cmd
-    def do_delete_person(self, args):
+    def do_save_state(self, arg):
+        """ Usage: save_state <sqlite_database> """
+        self.amity.save_state(arg['<sqlite_database>'])
+
+    @docopt_cmd
+    def do_load_state(self, arg):
+        """ Usage: load_state <sqlite_database> """
+        self.amity.load_state(arg['<sqlite_database>'])
+
+    @docopt_cmd
+    def do_delete_person(self, arg):
         """Usage: delete_person <first_name> <last_name>"""
-        first_name = args['<first_name>'].upper()
-        last_name = args['<last_name>'].upper()
-        person_name = first_name + " " + last_name
-        self.amity.delete_person(person_name)
+        p_id = arg['<person_identifier>']
+        self.amity.delete_person(p_id)
 
     @docopt_cmd
     def do_delete_room(self, args):
