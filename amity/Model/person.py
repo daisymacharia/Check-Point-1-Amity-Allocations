@@ -3,6 +3,7 @@ class Person (object):
     def __init__(self, person_name, person_type, allocate_living_space="N"):
         self.person_name = person_name
         self.person_type = person_type
+        self.person_id = id(self)
 
 
 class Fellow(Person):
