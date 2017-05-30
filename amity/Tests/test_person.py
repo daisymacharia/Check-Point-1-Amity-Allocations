@@ -1,5 +1,6 @@
 from io import StringIO
 from Controller.amity import Amity
+from Model.person import Fellow, Staff
 import unittest
 import sys
 from os import path
@@ -9,6 +10,9 @@ sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 class TestPeople(unittest.TestCase):
     def setUp(self):
         self.amity = Amity()
+
+    def tearDown(self):
+
         self.held, sys.stdout = sys.stdout, StringIO()
         self.amity.all_people = {'staff': [], 'fellow': []}
         self.amity.all_rooms = {'livingspace': [], 'office': []}
@@ -61,95 +65,63 @@ class TestPeople(unittest.TestCase):
 
     def test_reallocation_of_fellow_to_new_office(self):
         """Tests that a fellow is successfully reallocated to a new office"""
-        self.amity.create_room('OFFICE', 'test_office_reallocations')
-        self.amity.reallocate_fellow('test_fellow',
-                                     'test_office_reallocations')
+        self.amity.create_room('OFFICE', 'test_reallocations')
+        fellow_obj = Fellow("test_fellow")
+        self.amity.all_people['fellow'].append(fellow_obj)
+        self.amity.reallocate_person(fellow_obj.person_id,'test_reallocations')
         message = sys.stdout.getvalue().strip()
         self.assertIn('test_fellow has been reallocated to office'
-                      + " " + 'test_office_reallocations', message)
+                      + " " + 'test_reallocations', message)
 
     def test_reallocation_of_fellow_to_new_living_space(self):
         """Tests that a fellow is successfully reallocated to a new
            living space"""
-        self.amity.create_room('LIVINGSPACE', 'test_livingspace')
-        self.amity.add_person('FELLOW', 'Tumbo', "Y")
-        self.amity.create_room('LIVINGSPACE', 'test_livingspace_reallocations')
-        self.amity.reallocate_fellow('Tumbo', 'test_livingspace_reallocations')
+        self.amity.create_room('LIVINGSPACE', 'test_living_reallocations')
+        fellow_obj = Fellow("Tumbo")
+        self.amity.all_people['fellow'].append(fellow_obj)
+        self.amity.reallocate_person(fellow_obj.person_id,'test_living_reallocations')
         message = sys.stdout.getvalue().strip()
         self.assertIn('Tumbo has been reallocated to livingspace'
-                      + ' ' + 'test_livingspace_reallocations', message)
+                      + " " + 'test_living_reallocations', message)
 
     def test_reallocation_of_staff_to_new_office(self):
         """Tests that a staff is successfully reallocated to a new office"""
-        self.amity.create_room('OFFICE', 'test_office_reallocations_for_staff')
-        self.amity.reallocate_staff('test_staff',
-                                    'test_office_reallocations_for_staff')
+        self.amity.create_room('OFFICE', 'test_office_reallocations')
+        staff_obj = Staff("Macharia")
+        self.amity.all_people['staff'].append(staff_obj)
+        self.amity.reallocate_person(staff_obj.person_id,'test_office_reallocations')
         message = sys.stdout.getvalue().strip()
-        self.assertIn('test_staff has been reallocated to office'
-                      + ' ' + 'test_office_reallocations_for_staff', message)
-
-    def test_reallocated_fellow_is_removed_from_previous_office(self):
-        """Tests that a fellow is removed from the previous office once they are
-           reallocated to a new office"""
-        self.amity.create_room('OFFICE', 'Blue')
-        self.amity.add_person('FELLOW', 'DAISY MACHARIA')
-        self.amity.create_room('OFFICE', 'Red')
-        self.amity.reallocate_person('DAISY MACHARIA', 'Red')
-        message = sys.stdout.getvalue().strip()
-        self.assertIn('DAISY MACHARIA removed from previous office', message)
-
-    def test_reallocated_fellow_is_removed_from_previous_livingspace(self):
-        """Tests that a fellow is removed from the previous livingspace once
-           they are reallocated to a new livingspace """
-        self.amity.create_room('LIVINGSPACE', 'Blue')
-        self.amity.add_person('FELLOW', 'Roy Mweri', "Y")
-        self.amity.create_room('LIVINGSPACE', 'Red')
-        self.amity.reallocate_person('Roy Mweri', 'Red')
-        message = sys.stdout.getvalue().strip()
-        self.assertIn('Roy Mweri removed from previous livingspace', message)
-
-    def test_reallocated_staff_is_removed_from_previous_office(self):
-        """Tests that a staff is removed from the previous office once they are
-           reallocated to a new office"""
-        self.amity.create_room('OFFICE', 'Blue')
-        self.amity.add_person('STAFF', 'Hamzi Wato')
-        self.amity.create_room('OFFICE', 'Red')
-        self.amity.reallocate_person('Hamzi Wato', 'Red')
-        message = sys.stdout.getvalue().strip()
-        self.assertIn('Hamzi Wato removed from previous office', message)
+        self.assertIn('Macharia has been reallocated to office'
+                      + " " + 'test_office_reallocations', message)
 
     def test_cannot_reallocated_staff_to_a_livingspace(self):
         """Tests that a staff is not reallocated to a living space"""
-        self.amity.create_room('LIVINGSPACE', 'test_reallocations_staff')
-        self.amity.reallocate_staff('test_staff',
-                                    'test_reallocations_staff')
+        self.amity.create_room('LIVINGSPACE', 'test_staff_reallocations')
+        staff_obj = Staff("Cynthia")
+        self.amity.all_people['staff'].append(staff_obj)
+        self.amity.reallocate_person(staff_obj.person_id,'test_staff_reallocations')
         message = sys.stdout.getvalue().strip()
-        self.assertIn('Cannot reallocate a staff to a living space',
-                      message)
+        self.assertIn('Cannot reallocate a staff to a living space', message)
 
     def test_removes_people_from_waiting_list_after_reallocation(self):
         """Tests that reallocations of people on waiting lists removes them from
          the waiting list"""
-        self.amity.add_person('FELLOW', 'Waithira Njihia')
         self.amity.create_room('OFFICE', 'Red')
-        self.amity.reallocate_person('Waithira Njihia', 'Red')
+        self.amity.reallocate_person(self.amity.all_people['fellow'][0].person_id,'Red')
         message = sys.stdout.getvalue().strip()
-        self.assertIn('Waithira Njihia removed from waiting list', message)
+        self.assertIn(self.amity.all_people['fellow'][0].person_name + " "
+                      'removed from waiting list', message)
 
     # def test_delete_person(self):
     #     self.amity.create_room('OFFICE', 'Red')
     #     self.amity.add_person('FELLOW', 'Njoki')
     #     self.amity.delete_person("Njoki")
-    #     # message = sys.stdout.getvalue().strip()
-    #     # self.assertIn("Muthoni does not exist", message)
     #
     #     for person in self.amity.all_people['fellow']:
     #         self.assertNotIn("Njoki", person.person_name)
-    #
-    #     # self.assertNotIn("Wanjiru", self.amity.all_people)
     #     for room in self.amity.all_rooms['office']:
     #         self.assertNotIn("Njoki", room.room_occupants)
-
+    #
 
 if __name__ == '__main__':
     unittest.main()
