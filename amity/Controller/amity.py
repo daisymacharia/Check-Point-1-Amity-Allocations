@@ -1,8 +1,11 @@
 import random
 
-from Model.person import Fellow, Staff
-from Model.room import LivingSpace, Office
+from amity.Model.person import Fellow, Staff
+from amity.Model.room import LivingSpace, Office
 from termcolor import cprint
+import sys
+from os import path
+sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 
 
 class Amity():
@@ -44,13 +47,12 @@ class Amity():
                                  if len(room.room_occupants) < room.capacity]
             if available_offices:
                 allocated_office = random.choice(available_offices)
-                allocated_office.room_occupants.append(
-                                                     person_object.person_name)
+                allocated_office.room_occupants.append(person_object)
                 cprint("{} added to office {}".format(
                        person_object.person_name,
                        allocated_office.room_name), "cyan")
             else:
-                self.waiting_list['office'].append(person_object.person_name)
+                self.waiting_list['office'].append(person_object)
                 cprint("No available rooms, you'll be added to the office"
                        + " " + "waiting list", "red")
         elif room_type == "LIVINGSPACE":
@@ -60,14 +62,12 @@ class Amity():
                                       room.capacity]
             if available_livingspaces:
                 allocated_livingspace = random.choice(available_livingspaces)
-                allocated_livingspace.room_occupants.append(
-                                                     person_object.person_name)
+                allocated_livingspace.room_occupants.append(person_object)
                 cprint("{} successfully added to living space {}".
                        format(person_object.person_name,
                               allocated_livingspace.room_name), "cyan")
             else:
-                self.waiting_list['livingspace'].append(
-                                                    person_object.person_name)
+                self.waiting_list['livingspace'].append(person_object)
                 cprint("No available rooms, you'll be added to the"
                        + " " + "livingspace waiting list", "red")
         elif room_type not in ["LIVINGSPACE" ''"OFFICE"]:
@@ -84,155 +84,159 @@ class Amity():
         if person_type == "STAFF":
             staff_object = Staff(person_name)
             self.all_people['staff'].append(staff_object)
-            cprint("Staff {} added successfully".format(
-                   staff_object.person_name), "cyan")
+            cprint("Staff {} ID: {} added successfully".format(
+                   staff_object.person_name,  staff_object.person_id), "cyan")
             self.allocate_room("OFFICE", staff_object)
             if want_accomodation == "Y":
                 cprint("Staff cannot be allocated a living space", "red")
         # add a new fellow member
         elif person_type == "FELLOW":
             fellow_object = Fellow(person_name)
+            fellow_id = "F" + "-" + str(fellow_object.person_id)
             self.all_people['fellow'].append(fellow_object)
-            cprint("Fellow {} added successfully".format(
-                   fellow_object.person_name), "cyan")
+            cprint("Fellow {} ID: {} added successfully".format(
+                   fellow_object.person_name, fellow_object.person_id), "cyan")
             self.allocate_room("OFFICE", fellow_object)
             if want_accomodation == "Y":
                 self.allocate_room("LIVINGSPACE", fellow_object)
         elif person_type not in ["STAFF", "FELLOW"]:
             cprint("Invalid person type", "red")
 
-    def remove_person_from_previous_office(self, person_name):
+    def remove_person_from_previous_office(self, p_id):
 
         """ Removes a staff or fellow from the offices they were previously
             located in or from the waiting list if they did not have
             a livingspace """
         for room in self.all_rooms['office']:
             for person in room.room_occupants:
-                if person == person_name:
-                    room.room_occupants.remove(person_name)
+                if person.person_id == p_id:
+                    room.room_occupants.remove(person)
                     cprint("{} removed from previous office".format
-                           (person_name), "cyan")
+                           (person.person_name), "cyan")
                     return
-        if person_name in self.waiting_list['office']:
-            self.waiting_list['office'].remove(person_name)
-            cprint("{} removed from waiting list".format(
-                   person_name), "cyan")
+        for person in self.waiting_list['office']:
+            if person.person_id == p_id:
+                self.waiting_list['office'].remove(person_name)
+                cprint("{} removed from waiting list".format(
+                       person.person_name), "cyan")
 
-    def remove_person_from_previous_livingspace(self, person_name):
+    def remove_person_from_previous_livingspace(self, p_id):
         """ Removes a fellow from the living spaces they were previously
             located in or from the waiting list if they did not have a
             livingspace """
         for room in self.all_rooms['livingspace']:
             for person in room.room_occupants:
-                if person == person_name:
-                    room.room_occupants.remove(person_name)
+                if person.person_id == p_id:
+                    room.room_occupants.remove(person)
                     cprint("{} removed from previous livingspace"
-                           .format(person_name), "cyan")
+                           .format(person.person_name), "cyan")
                     return
-        if person_name in self.waiting_list['livingspace']:
-            self.waiting_list['livingspace'].remove(person_name)
-            cprint("{} removed from waiting list".format(
-                   person_name), "cyan")
+        for person in self.waiting_list['livingspace']:
+            if person.person_id == p_id:
+                self.waiting_list['livingspace'].remove(person_name)
+                cprint("{} removed from waiting list".format(
+                       person.person_name), "cyan")
 
-    def reallocate_staff(self, person_name, new_room_name):
+    def reallocate_staff(self, p_id, new_room_name):
         """ Reallocate a staff to a different office and rejects allocation to
             a living space """
-        try:
-            for room in self.all_rooms['office'] + self.all_rooms[
-                                                               'livingspace']:
-                if room.room_name == new_room_name \
-                        and room.room_type == "office":
-                    for person in room.room_occupants:
-                        # checks if person already exists in the new office
-                        if person == person_name:
-                            cprint("{} already exists in the room {}".format(
-                                   person_name, new_room_name), "red")
-                            return
-                    # reallocate a person and call function
-                    # remove_person_from_previous_office
-                    # to remove the staff from the previous
-                    # office or waiting list
-                    if len(room.room_occupants) < 6:
-                        self.remove_person_from_previous_office(person_name)
-                        room.room_occupants.append(person_name)
-                        cprint("{} has been reallocated to office {}" .format(
-                               person_name, new_room_name), "cyan")
+        room = [room for room in self.all_rooms['office'] +  self.all_rooms[
+                'livingspace'] if room.room_name == new_room_name]
+        person = [person for person in self.all_people['staff']
+                  if person.person_id == p_id]
+        if room:
+            if room[0].room_type == "office":
+                for person_obj in room[0].room_occupants:
+                    # checks if person already exists in the new office
+                    if person_obj.person_id == p_id:
+                        cprint("{} already exists in the room {}".format(
+                               person[0].person_name, new_room_name), "red")
                         return
-                    else:
-                        cprint("Office {} is full, choose another room".format(
-                               new_room_name), "red")
-
-                elif room.room_name == new_room_name \
-                        and room.room_type == "livingspace":
-                    cprint("Cannot reallocate a staff to a living space",
-                           "red")
+                # reallocate a person and call function
+                # remove_person_from_previous_office
+                # to remove the staff from the previous
+                # office or waiting list
+                if len(room[0].room_occupants) < 6:
+                    self.remove_person_from_previous_office(p_id)
+                    room[0].room_occupants.append(person[0])
+                    cprint("{} has been reallocated to office {} ".format(
+                           person[0].person_name, new_room_name), "cyan")
                     return
-        except ValueError:
-            cprint("Wrong inputs", "red")
+                else:
+                    cprint("Office {} is full, choose another room".format(
+                           new_room_name), "red")
+                    return
 
-    def reallocate_fellow(self, person_name, new_room_name):
+            elif room[0].room_type == "livingspace":
+                cprint("Cannot reallocate a staff to a living space",
+                       "red")
+                return
+        else:
+            cprint("{} does not exist".format(new_room_name), "red")
+
+    def reallocate_fellow(self, p_id, new_room_name):
         """ Reallocate a fellow to a different office or living space """
-        try:
-            for room in self.all_rooms['office'] + self.all_rooms[
-                                                               'livingspace']:
-                if room.room_name == new_room_name \
-                        and room.room_type == "office":
-                    for name in room.room_occupants:
-                        # checks if person already exists in the new office
-                        if name == person_name:
-                            cprint("{} already exists in the room {}".format(
-                                   person_name, new_room_name), "red")
-                            return
-                    if len(room.room_occupants) < 6:
-                        self.remove_person_from_previous_office(person_name)
-                        room.room_occupants.append(person_name)
-                        cprint("{} has been reallocated to office {} ".format(
-                               person_name, new_room_name), "cyan")
-                        return
-                    else:
-                        cprint("Office {} is full, choose another room".format(
-                               new_room_name), "red")
-                        return
-                elif room.room_name == new_room_name \
-                        and room.room_type == "livingspace":
-                    for name in room.room_occupants:
-                        if name == person_name:
-                            cprint("{} already exists in the room {}"
-                                   .format(person_name, new_room_name), "red")
-                            return
-                    if len(room.room_occupants) < 4:
-                        self.remove_person_from_previous_livingspace(
-                         person_name)
-                        room.room_occupants.append(person_name)
-                        cprint("{} has been reallocated to livingspace {}"
-                               .format(person_name, new_room_name), "cyan")
-                        return
-                    else:
-                        cprint("Livingspace {} is full, choose another room"
-                               .format(new_room_name), "red")
-                        return
-        except ValueError:
-            cprint("Wrong inputs", "red")
+        room = [room for room in self.all_rooms['office'] +  self.all_rooms[
+                'livingspace'] if room.room_name == new_room_name]
+        person = [person for person in self.all_people['fellow']
+                  if person.person_id == p_id]
 
-    def reallocate_person(self, person_name, new_room_name):
+        if room:
+            if room[0].room_type == "office":
+                for person_obj in room[0].room_occupants:
+                    # checks if person already exists in the new office
+                    if person_obj.person_id == p_id:
+                        cprint("{} already exists in the room {}".format(
+                               person[0].person_name, new_room_name), "red")
+                        return
+                if len(room[0].room_occupants) < 6:
+                    self.remove_person_from_previous_office(p_id)
+                    room[0].room_occupants.append(person[0])
+                    cprint("{} has been reallocated to office {} ".format(
+                           person[0].person_name, new_room_name), "cyan")
+                    return
+                else:
+                    cprint("Office {} is full, choose another room".format(
+                           new_room_name), "red")
+                    return
+            elif room[0].room_type == "livingspace":
+                for person_obj in room[0].room_occupants:
+                    if person_obj.person_id == p_id:
+                        cprint("{} already exists in the room {}".format(
+                               person[0].person_name, new_room_name), "red")
+                        return
+                if len(room[0].room_occupants) < 4:
+                    self.remove_person_from_previous_livingspace(p_id)
+                    room[0].room_occupants.append(person[0])
+                    cprint("{} has been reallocated to livingspace {}"
+                           .format(person[0].person_name, new_room_name
+                           ), "cyan")
+                    return
+                else:
+                    cprint("Livingspace {} is full, choose another room"
+                           .format(new_room_name), "red")
+                    return
+        else:
+            cprint("{} does not exist".format(new_room_name), "red")
+
+    def reallocate_person(self, p_id, new_room_name):
         """ Reallocate a person to a different office or living space """
-        try:
-            for person in self.all_people['staff'] + self.all_people['fellow']:
-                if (person.person_name == person_name) \
-                        and (person.person_type == "staff"):
-                    self.reallocate_staff(person_name, new_room_name)
-                elif person.person_name == person_name \
-                        and person.person_type == "fellow":
-                    self.reallocate_fellow(person_name, new_room_name)
-        except ValueError:
-            cprint("{} does not exist".format(person_name), "red")
+        people =  self.all_people['staff'] + self.all_people['fellow']
+        person = [person for person in people if person.person_id == p_id]
+        if person:
+            if person[0].person_type == "staff":
+                self.reallocate_staff(p_id, new_room_name)
+            elif person[0].person_type == "fellow":
+                self.reallocate_fellow(p_id, new_room_name)
+        else:
+            cprint("{} does not exist".format(p_id), "red")
 
     def load_people(self, filename):
         """ Collects details about employees from a .txt file and
             adds them to the system """
         try:
             if filename:
-                filepath = 'files/' + filename + '.txt'
+                filepath = 'amity/files/' + filename + '.txt'
                 load_people_file = open(filepath)
                 for line in load_people_file.read().splitlines():
                     if len(line) == 0:
@@ -258,11 +262,16 @@ class Amity():
             allocated into rooms """
         try:
             if filename:
-                filepath = 'files/' + filename + '.txt'
+                filepath = 'amity/files/' + filename + '.txt'
                 print_unallocated_file = open(filepath, 'w')
-                for person in self.waiting_list['office'] + \
-                        self.waiting_list['livingspace']:
-                    print_unallocated_file.write(person + '\n')
+                for person in self.waiting_list['office']:
+                    print_unallocated_file.write("UNALLOCATED TO OFFICES...\n")
+                    print_unallocated_file.write('*'*60)
+                    print_unallocated_file.write(',\t'. join(person.person_name))
+                for person in self.waiting_list['livingspace']:
+                    print_unallocated_file.write("UNALLOCATED TO LIVINGSPACES...\n")
+                    print_unallocated_file.write('*'*60)
+                    print_unallocated_file.write(',\t'. join(person.person_name))
                 print_unallocated_file.close()
                 cprint('\t\t Printing to {} completed'.format(
                        filename), "white")
@@ -312,7 +321,7 @@ class Amity():
     def print_allocations(self, filename=None):
         try:
             if filename:
-                filepath = 'files/' + filename + '.txt'
+                filepath = 'amity/files/' + filename + '.txt'
                 print_allocations_file = open(filepath, 'w')
                 print_allocations_file.write("OFFICES...\n")
                 for room in self.all_rooms['office']:
@@ -343,7 +352,7 @@ class Amity():
         except Exception:
             cprint("An error occured while printing. Please try again", "red")
 
-    def delete_person(self, person_name):
+    def delete_person(self, p_id):
         """ Delete the records of a specific person from the system"""
         try:
             for person in self.all_people['fellow'] + self.all_people['staff']:
