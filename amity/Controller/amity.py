@@ -79,6 +79,11 @@ class Amity():
 
     def add_person(self, person_type, person_name, want_accomodation=""):
         """ adds a new person whether staff or fellow """
+        # check if the name contains digits
+        is_digit = any(char.isdigit() for char in person_name)
+        if is_digit:
+            cprint("Invalid name. Use letters only", 'red')
+            return
         # check if person exists in the system
         for person in self.all_people['staff'] + self.all_people['fellow']:
             if person.person_name == person_name:
@@ -241,7 +246,7 @@ class Amity():
             adds them to the system """
         try:
             if filename:
-                filepath = 'files/' + filename + '.txt'
+                filepath = 'amity/files/' + filename + '.txt'
                 load_people_file = open(filepath)
                 for line in load_people_file.read().splitlines():
                     if len(line) == 0:
@@ -257,8 +262,10 @@ class Amity():
                                         want_accomodation)
                     except IndexError:
                         want_accomodation = 'N'
+                        cprint('*'*60 + '\n', 'white')
                         self.add_person(person_type, person_name,
                                         want_accomodation)
+                        cprint('*'*60 + '\n', 'white')
         except Exception:
             cprint('That file does not exist...', "red")
 
@@ -267,7 +274,7 @@ class Amity():
             allocated into rooms """
         try:
             if filename:
-                filepath = 'files/' + filename + '.txt'
+                filepath = 'amity/files/' + filename + '.txt'
                 print_unallocated_file = open(filepath, 'w')
                 for person in self.waiting_list['office']:
                     print_unallocated_file.write("UNALLOCATED TO OFFICES...\n")
@@ -298,7 +305,7 @@ class Amity():
                        room[0].room_name), "white")
                 cprint('*'*60, "cyan")
                 for person in members:
-                    cprint(',\t'.join(str(person.person_name)), "magenta")
+                    cprint('\t' + person.person_name + ',', "magenta")
                 print('\n')
             else:
                 cprint("There are no occupants in room {}"
@@ -328,7 +335,7 @@ class Amity():
     def print_allocations(self, filename=None):
         try:
             if filename:
-                filepath = 'files/' + filename + '.txt'
+                filepath = 'amity/files/' + filename + '.txt'
                 print_allocations_file = open(filepath, 'w')
                 print_allocations_file.write("OFFICES...\n")
                 for room in self.all_rooms['office']:
@@ -343,16 +350,16 @@ class Amity():
                 print_allocations_file.write("LIVINGSPACES...\n")
                 for room in self.all_rooms['livingspace']:
                     print_allocations_file.write('\n\t' + room.room_name +
-                                                 '\n' + '-' * 100 + '\n')
+                                                 '\n' + '-' * 90 + '\n')
                     if room.room_occupants:
                         for person in room.room_occupants:
-                            print_allocations_file.write(person)
+                            print_allocations_file.write('\t' + person.person_name + ',')
                     else:
                         print_allocations_file.write("No occupants")
                     print_allocations_file.write('\n')
                 print_allocations_file.close()
-                cprint('\t\t Printing to {} complete'.format(
-                       filename), "white")
+                cprint('Printing to {} complete'.format(
+                       filename), "cyan")
                 return
             else:
                 self.print_office_allocations()
@@ -396,7 +403,7 @@ class Amity():
         close the database connection
         """
 
-        path = 'Database/'
+        path = 'amity/Database/'
         db_connect = sqlite3.connect(path + db_file)
         conn = db_connect.cursor()
 
@@ -414,7 +421,7 @@ class Amity():
         db_connect.commit()
         db_connect.close()
 
-        return 'Data successfully exported to Database'
+        cprint('Data successfully exported to Database', 'cyan')
 
     def load_state(self, db_file):
 
@@ -427,7 +434,7 @@ class Amity():
 
         """
         try:
-            path = 'Database/'
+            path = 'amity/Database/'
             db_connect = sqlite3.connect(path + db_file)
             conn = db_connect.cursor()
 
@@ -439,8 +446,9 @@ class Amity():
             Amity.waiting_list = pickle.loads(data[3])
 
             db_connect.close()
-            return 'Successfully loaded data from the Database!'
+            cprint('Successfully loaded data from the Database.', "cyan")
 
         except Error:
             remove(path + db_file)
-            return "Database not found, Please check the name and try again!"
+            cprint ("Database not found, Please check the name and try again!",
+                    red)
