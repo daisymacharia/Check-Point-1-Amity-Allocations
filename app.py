@@ -30,7 +30,11 @@ import cmd
 from docopt import docopt, DocoptExit
 from pyfiglet import Figlet, figlet_format
 from termcolor import colored, cprint
-from amity.amity import Amity
+from amity.Controller.amity import Amity
+import sys
+from os import path
+sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+
 
 
 def docopt_cmd(func):
@@ -95,12 +99,10 @@ class Amity(cmd.Cmd):
     @docopt_cmd
     def do_reallocate_person(self, args):
 
-        """Usage: reallocate_person <first_name> <last_name> <new_room_name>"""
-        first_name = args['<first_name>'].upper()
-        last_name = args['<last_name>'].upper()
+        """Usage: reallocate_person <person_identifier> <new_room_name>"""
+        p_id = args['<person_identifier>']
         new_room_name = args['<new_room_name>'].upper()
-        person_name = first_name + " " + last_name
-        self.amity.reallocate_person(person_name, new_room_name)
+        self.amity.reallocate_person(p_id, new_room_name)
 
     @docopt_cmd
     def do_print_room(self, arg):
