@@ -118,16 +118,20 @@ class TestPeople(unittest.TestCase):
         self.assertIn(self.amity.all_people['fellow'][0].person_name + " "
                       'removed from waiting list', message)
 
-    # def test_delete_person(self):
-    #     self.amity.create_room('OFFICE', 'Red')
-    #     self.amity.add_person('FELLOW', 'Njoki')
-    #     self.amity.delete_person("Njoki")
-    #
-    #     for person in self.amity.all_people['fellow']:
-    #         self.assertNotIn("Njoki", person.person_name)
-    #     for room in self.amity.all_rooms['office']:
-    #         self.assertNotIn("Njoki", room.room_occupants)
-    #
+    def test_delete_person(self):
+        """ Tests that a user is deleted from the system and from the rooms
+            they currently are allocated """
+        person_obj = Staff("Njoki")
+        self.amity.all_people['staff'].append(person_obj)
+        self.amity.create_room('OFFICE', 'Blue')
+        self.amity.reallocate_person(person_obj.person_id,'Blue')
+        self.amity.delete_person(person_obj.person_id)
+
+        for person in self.amity.all_people['staff']:
+            self.assertNotIn("Njoki", person.person_name)
+        for room in self.amity.all_rooms['office']:
+            for person in room.room_occupants:
+                self.assertNotIn(person_obj, room.room_occupants)
 
 if __name__ == '__main__':
     unittest.main()
