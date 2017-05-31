@@ -142,7 +142,6 @@ class TestPeople(unittest.TestCase):
         self.assertIn(self.amity.all_people['fellow'][0].person_name + " "
                       'removed from previous livingspace', message)
 
-
     def test_delete_person(self):
         """ Tests that a user is deleted from the system and from the rooms
             they currently are allocated """
