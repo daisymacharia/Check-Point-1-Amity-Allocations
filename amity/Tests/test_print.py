@@ -1,5 +1,5 @@
 from io import StringIO
-from Controller.amity import Amity
+from amity.Controller.amity import Amity
 import unittest
 import sys
 from os import path
@@ -37,7 +37,7 @@ class TestPeople(unittest.TestCase):
         self.assertIn("Printing to test_unallocated completed", message)
 
     def test_print_office_allocations_to_a_txt_file(self):
-        """Tests that the unallocated people are printed on a txt file"""
+        """Tests that the allocated people are printed on a txt file"""
         self.amity.create_room('OFFICE', 'test_office')
         self.amity.add_person('FELLOW', 'Steve', 'N')
         self.amity.print_allocations('test_allocations')
