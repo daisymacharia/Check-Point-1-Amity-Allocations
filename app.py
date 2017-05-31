@@ -143,7 +143,7 @@ class Amity(cmd.Cmd):
 
     @docopt_cmd
     def do_delete_person(self, arg):
-        """Usage: delete_person <first_name> <last_name>"""
+        """Usage: delete_person <person_identifier>"""
         p_id = arg['<person_identifier>']
         self.amity.delete_person(p_id)
 
@@ -151,7 +151,7 @@ class Amity(cmd.Cmd):
     def do_delete_room(self, args):
         """Usage: delete_room <room_name>"""
         room_name = args['<room_name>'].upper()
-        self.amity.delete_person(room_name)
+        self.amity.delete_room(room_name)
 
     def do_quit(self, args):
 
