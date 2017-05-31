@@ -10,6 +10,7 @@ sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 class TestPeople(unittest.TestCase):
     def setUp(self):
         self.amity = Amity()
+        self.tearDown()
 
     def tearDown(self):
 
@@ -66,7 +67,7 @@ class TestPeople(unittest.TestCase):
         self.amity.create_room('LIVINGSPACE', 'test_livingspace')
         self.amity.add_person('FELLOW', 'Ivy', 'Y')
         message = sys.stdout.getvalue().strip()
-        self.assertIn('Ivy successfully added to living space test_livingspace'
+        self.assertIn('Ivy successfully added to living space'
                       , message)
 
     def test_reallocation_of_fellow_to_new_office(self):
@@ -108,15 +109,6 @@ class TestPeople(unittest.TestCase):
         self.amity.reallocate_person(staff_obj.person_id,'test_staff_reallocations')
         message = sys.stdout.getvalue().strip()
         self.assertIn('Cannot reallocate a staff to a living space', message)
-
-    def test_removes_people_from_waiting_list_after_reallocation(self):
-        """Tests that reallocations of people on waiting lists removes them from
-         the waiting list"""
-        self.amity.create_room('OFFICE', 'Red')
-        self.amity.reallocate_person(self.amity.all_people['fellow'][0].person_id,'Red')
-        message = sys.stdout.getvalue().strip()
-        self.assertIn(self.amity.all_people['fellow'][0].person_name + " "
-                      'removed from waiting list', message)
 
     def test_delete_person(self):
         """ Tests that a user is deleted from the system and from the rooms
