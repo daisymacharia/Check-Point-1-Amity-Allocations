@@ -1,5 +1,5 @@
 from io import StringIO
-from Controller.amity import Amity
+from amity.Controller.amity import Amity
 import unittest
 import sys
 from os import path
@@ -56,6 +56,12 @@ class TestPeople(unittest.TestCase):
             self.amity.create_room('Wrong_input', 'test_wrong_livingspace')
             message = sys.stdout.getvalue().strip()
             self.assertIn('Invalid room type', message)
+
+        def test_delete_room(self):
+            """Tests that a room can be deleted and the occupants in the room
+               moved to the waiting list """
+            self.amity.create_room('OFFICE', 'test_delete')
+            self.amity.delete_room('test_delete')
 
 
 if __name__ == '__main__':
