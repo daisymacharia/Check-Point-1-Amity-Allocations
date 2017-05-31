@@ -110,6 +110,39 @@ class TestPeople(unittest.TestCase):
         message = sys.stdout.getvalue().strip()
         self.assertIn('Cannot reallocate a staff to a living space', message)
 
+    def test_removes_people_from_waiting_list_after_reallocation(self):
+        """Tests that reallocations of people on waiting lists removes them from
+         the waiting list"""
+        self.amity.add_person('FELLOW', 'Ivy')
+        self.amity.create_room('OFFICE', 'Red')
+        self.amity.reallocate_person(self.amity.all_people['fellow'][0].person_id,'Red')
+        message = sys.stdout.getvalue().strip()
+        self.assertIn(self.amity.all_people['fellow'][0].person_name + " "
+                      'removed from waiting list', message)
+
+    def test_removes_people_from_previous_office(self):
+        """Tests that reallocations of people to office removes them
+           from previous office """
+        self.amity.create_room('OFFICE', 'Blue')
+        self.amity.add_person('FELLOW', 'Ivy')
+        self.amity.create_room('OFFICE', 'Red')
+        self.amity.reallocate_person(self.amity.all_people['fellow'][0].person_id,'Red')
+        message = sys.stdout.getvalue().strip()
+        self.assertIn(self.amity.all_people['fellow'][0].person_name + " "
+                      'removed from previous office', message)
+
+    def test_removes_people_from_previous_livingspace(self):
+        """Tests that reallocations of people to living spaces removes them
+           from previous living spaces"""
+        self.amity.create_room('LIVINGSPACE', 'Blue')
+        self.amity.add_person('FELLOW', 'Ivy', 'Y')
+        self.amity.create_room('LIVINGSPACE', 'Red')
+        self.amity.reallocate_person(self.amity.all_people['fellow'][0].person_id,'Red')
+        message = sys.stdout.getvalue().strip()
+        self.assertIn(self.amity.all_people['fellow'][0].person_name + " "
+                      'removed from previous livingspace', message)
+
+
     def test_delete_person(self):
         """ Tests that a user is deleted from the system and from the rooms
             they currently are allocated """
