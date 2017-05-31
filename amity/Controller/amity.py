@@ -276,20 +276,26 @@ class Amity():
             if filename:
                 filepath = 'amity/files/' + filename + '.txt'
                 print_unallocated_file = open(filepath, 'w')
+                print_unallocated_file.write("UNALLOCATED TO OFFICES...\n")
+                print_unallocated_file.write('*'*60 + '\n')
                 for person in self.waiting_list['office']:
-                    print_unallocated_file.write("UNALLOCATED TO OFFICES...\n")
-                    print_unallocated_file.write('*'*60 + '\n')
                     print_unallocated_file.write('\t' + person.person_name + ',')
+                print_unallocated_file.write('\n\n')
+                print_unallocated_file.write("UNALLOCATED TO LIVINGSPACES...\n")
+                print_unallocated_file.write('*'*60 + '\n')
                 for person in self.waiting_list['livingspace']:
-                    print_unallocated_file.write("UNALLOCATED TO LIVINGSPACES...\n")
-                    print_unallocated_file.write('*'*60)
                     print_unallocated_file.write('\t' + person.person_name + ',')
                 print_unallocated_file.close()
-                cprint('\t\t Printing to {} completed'.format(
+                cprint('Printing to {} completed'.format(
                        filename), "white")
             else:
-                for person in self.waiting_list['office'] + \
-                 self.waiting_list['livingspace']:
+                cprint("\n UNALLOCATED TO OFFICES...\n", 'cyan')
+                cprint('*'*60 + '\n')
+                for person in self.waiting_list['office']:
+                    cprint(person.person_name, "yellow")
+                cprint("UNALLOCATED TO OFFICES...\n", 'cyan')
+                cprint('*'*60 + '\n')
+                for person in self.waiting_list['livingspace']:
                     cprint(person.person_name, "yellow")
         except ValueError:
             cprint("An error occured while printing. Please try again", "red")
@@ -370,27 +376,40 @@ class Amity():
 
     def delete_person(self, p_id):
         """ Delete the records of a specific person from the system"""
-        try:
-            for person in self.all_people['fellow'] + self.all_people['staff']:
-                if person.person_name == person_name:
-                    del person
-            for room in self.all_rooms['office'] + self.all_rooms['livingspace']:
-                if room.room_occupants == person_name:
-                    room.room_occupants.remove(person_name)
-        except Exception:
-            return "{} does not exist".format(person_name)
+        rooms = [room for room in self.all_rooms['office'] +
+                self.all_rooms['livingspace']]
+        person = [person for person in self.all_people['fellow'] +
+                  self.all_people['staff'] if  person.person_id == p_id]
+        if person:
+            if person[0].person_type == 'fellow':
+                self.all_people['fellow'].remove(person[0])
+                cprint('Fellow {} deleted'.format(person[0].person_name), 'cyan')
+            elif person[0].person_type == 'staff':
+                self.all_people['staff'].remove(person[0])
+                cprint('Staff {} deleted'.format(person[0].person_name), 'cyan')
+            for room in rooms:
+                if person[0] in room.room_occupants:
+                    room.room_occupants.remove(person[0])
+        else:
+            cprint("{} does not exist".format(p_id), 'red')
 
-    def delete_room(self, room_name):
+    def delete_room(self, roomname):
         """ Delete the records of a specific room from the system"""
-        try:
-            for room in self.all_rooms['office']:
-                if room .room_name == room_name:
-                    self.all_rooms['office'].remove(room_name)
-            for room in self.all_rooms['livingspace']:
-                if room .room_name == room_name:
-                    self.all_rooms['livingspace'].remove(room_name)
-        except Exception:
-            return "{} does not exist" .format(room_name)
+        rooms = [room for room in self.all_rooms['office'] +
+                self.all_rooms['livingspace'] if room.room_name == roomname]
+        if rooms:
+            if rooms[0].room_type == 'office':
+                for person in rooms[0].room_occupants:
+                    self.waiting_list['office'].append(person)
+                self.all_rooms['office'].remove(rooms[0])
+                cprint('Office {} deleted'.format(roomname), 'cyan')
+            elif rooms[0].room_type == 'livingspace':
+                for person in rooms[0].room_occupants:
+                    self.waiting_list['livingspace'].append(person)
+                self.all_rooms['livingspace'].remove(rooms[0])
+                cprint('Living space {} deleted'.format(roomname), 'cyan')
+        else:
+            cprint("{} does not exist" .format(roomname), 'red')
 
 
     def save_state(self, db_file):
