@@ -16,6 +16,8 @@ Usage:
     app load_state <sqlite_database>
     app delete_person <person_identifier>
     app delete_room <room_name>
+    app print_all_people [<filename>]
+    app print_all_rooms [<filename>]
     app (-i | --interactive)
     app (-h | --help)
 
@@ -152,6 +154,19 @@ class Amity(cmd.Cmd):
         """Usage: delete_room <room_name>"""
         room_name = args['<room_name>'].upper()
         self.amity.delete_room(room_name)
+
+    @docopt_cmd
+    def do_print_all_people(self, arg):
+        """Usage: print_all_people [<filename>]"""
+        filename = arg['<filename>'] or None
+        self.amity.print_all_people(filename)
+
+    @docopt_cmd
+    def do_print_all_rooms(self, arg):
+        """Usage: print_all_rooms [<filename>]"""
+        filename = arg['<filename>'] or None
+        self.amity.print_all_rooms(filename)
+
 
     def do_quit(self, args):
 
