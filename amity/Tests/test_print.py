@@ -53,10 +53,34 @@ class TestPeople(unittest.TestCase):
                           self.amity.all_people['staff'])
         self.assertGreater(final_count, initial_count)
 
+    def test_load_people_from_not_existent_txt_file(self):
+        """ Tests that peole cannot be loaded from a non existent file"""
+        self.amity.load_people('test')
+        message = sys.stdout.getvalue().strip()
+        self.assertIn("That file does not exist...", message)
 
-#     def test_load_people_from_not_existent_txt_file(self):
-#         pass
-#
-#
-# if __name__ == '__main__':
-#     unittest.main()
+    def test_print_all_rooms_on_screen(self):
+        """ Tests that all rooms can be printed on the screen """
+        self.amity.create_room('OFFICE', 'test_office')
+        self.amity.print_all_rooms()
+        message = sys.stdout.getvalue().strip()
+        self.assertIn("test_office", message)
+
+    def test_print_all_rooms_on_txt(self):
+        """ Tests that all rooms can be printed on a txt file """
+        self.amity.create_room('OFFICE', 'test_office')
+        self.amity.print_all_rooms('test')
+        message = sys.stdout.getvalue().strip()
+        self.assertIn("***Done***", message)
+
+    def test_print_all_people(self):
+        """ Tests that all people can be printed on the screen """
+        self.amity.add_person('FELLOW', 'print_all')
+        self.amity.print_all_people()
+        message = sys.stdout.getvalue().strip()
+        self.assertIn("print_all", message)
+
+
+
+if __name__ == '__main__':
+    unittest.main()
