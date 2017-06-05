@@ -1,4 +1,6 @@
+
 [![Travis branch](https://img.shields.io/travis/daisymacharia/Check-Point-1-Amity-Allocations/develop.svg)]()
+
 [![Coverage Status](https://coveralls.io/repos/github/daisymacharia/Check-Point-1-Amity-Allocations/badge.svg?branch=develop)](https://coveralls.io/github/daisymacharia/Check-Point-1-Amity-Allocations?branch=develop)
 # Check-Point-1-Amity-Allocations
 A command-line application of a room allocation system for one of Andela’s facilities called Amity. This application allows one to create a list of rooms, add person, load the data stored in the application to a database among other functions.
