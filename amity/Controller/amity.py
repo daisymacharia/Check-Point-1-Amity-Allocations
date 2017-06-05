@@ -21,26 +21,35 @@ class Amity():
 
     def create_room(self, room_type, room_name):
         """Creates new offices and living spaces and stores them in lists"""
-        # check if room already exists
-        for room in self.all_rooms['office'] + self.all_rooms['livingspace']:
-            if room.room_name == room_name:
-                cprint("{} already exists".format(room_name), "red")
+        # check if the name contains non alphabets
+        alpha = any(char.isalpha() for char in room_name)
+        if alpha:
+            # check if room already exists
+            for room in self.all_rooms['office'] + self.all_rooms['livingspace']:
+                if room.room_name == room_name:
+                    cprint("{} already exists".format(room_name), "red")
+                    return
+            # create office space
+            if room_type == "OFFICE":
+                new_office = Office(room_name)
+                self.all_rooms['office'].append(new_office)
+                cprint("Office {} created successfully".format(
+                       new_office.room_name), "cyan")
                 return
-        # create office space
-        if room_type == "OFFICE":
-            new_office = Office(room_name)
-            self.all_rooms['office'].append(new_office)
-            cprint("Office {} created successfully".format(
-                   new_office.room_name), "cyan")
-        # create living space
-        elif room_type == "LIVINGSPACE":
-            new_livingspace = LivingSpace(room_name)
-            self.all_rooms['livingspace'].append(new_livingspace)
-            cprint("Livingspace {} created successfully".format(
-                   new_livingspace.room_name), "cyan")
+            # create living space
+            elif room_type == "LIVINGSPACE":
+                new_livingspace = LivingSpace(room_name)
+                self.all_rooms['livingspace'].append(new_livingspace)
+                cprint("Livingspace {} created successfully".format(
+                       new_livingspace.room_name), "cyan")
+                return
 
-        elif room_type not in ["LIVINGSPACE" ''"OFFICE"]:
-            cprint("Invalid room type", "red")
+            elif room_type not in ["LIVINGSPACE" ''"OFFICE"]:
+                cprint("Invalid room type", "red")
+                return
+        else:
+            cprint("Invalid name. Use letters only", 'red')
+            return
 
     def allocate_room(self, room_type, person_object):
         """generates a random room from a list of available rooms whenever it
@@ -79,38 +88,39 @@ class Amity():
 
     def add_person(self, person_type, person_name, want_accomodation=""):
         """ adds a new person whether staff or fellow """
-        # check if the name contains digits
-        is_digit = any(char.isdigit() for char in person_name)
-        if is_digit:
+        # check if the name contains non alphabets
+        alpha = any(char.isalpha() for char in person_name)
+        if alpha:
+            # check if person exists in the system
+            for person in self.all_people['staff'] + self.all_people['fellow']:
+                if person.person_name == person_name:
+                    cprint("{} already exists".format(person_name), "red")
+                    return
+            # add a new staff member
+            if person_type == "STAFF":
+                staff_object = Staff(person_name)
+                staff_object.person_id = "S" + "-" + str(staff_object.person_id)
+                self.all_people['staff'].append(staff_object)
+                cprint("Staff {} ID: {} added successfully".format(
+                       staff_object.person_name,  staff_object.person_id), "cyan")
+                self.allocate_room("OFFICE", staff_object)
+                if want_accomodation == "Y":
+                    cprint("Staff cannot be allocated a living space", "red")
+            # add a new fellow member
+            elif person_type == "FELLOW":
+                fellow_object = Fellow(person_name)
+                fellow_object.person_id = "F" + "-" + str(fellow_object.person_id)
+                self.all_people['fellow'].append(fellow_object)
+                cprint("Fellow {} ID: {} added successfully".format(
+                       fellow_object.person_name, fellow_object.person_id), "cyan")
+                self.allocate_room("OFFICE", fellow_object)
+                if want_accomodation == "Y":
+                    self.allocate_room("LIVINGSPACE", fellow_object)
+            elif person_type not in ["STAFF", "FELLOW"]:
+                cprint("Invalid person type", "red")
+        else:
             cprint("Invalid name. Use letters only", 'red')
             return
-        # check if person exists in the system
-        for person in self.all_people['staff'] + self.all_people['fellow']:
-            if person.person_name == person_name:
-                cprint("{} already exists".format(person_name), "red")
-                return
-        # add a new staff member
-        if person_type == "STAFF":
-            staff_object = Staff(person_name)
-            staff_object.person_id = "S" + "-" + str(staff_object.person_id)
-            self.all_people['staff'].append(staff_object)
-            cprint("Staff {} ID: {} added successfully".format(
-                   staff_object.person_name,  staff_object.person_id), "cyan")
-            self.allocate_room("OFFICE", staff_object)
-            if want_accomodation == "Y":
-                cprint("Staff cannot be allocated a living space", "red")
-        # add a new fellow member
-        elif person_type == "FELLOW":
-            fellow_object = Fellow(person_name)
-            fellow_object.person_id = "F" + "-" + str(fellow_object.person_id)
-            self.all_people['fellow'].append(fellow_object)
-            cprint("Fellow {} ID: {} added successfully".format(
-                   fellow_object.person_name, fellow_object.person_id), "cyan")
-            self.allocate_room("OFFICE", fellow_object)
-            if want_accomodation == "Y":
-                self.allocate_room("LIVINGSPACE", fellow_object)
-        elif person_type not in ["STAFF", "FELLOW"]:
-            cprint("Invalid person type", "red")
 
     def remove_person_from_previous_office(self, p_id):
 
@@ -293,7 +303,7 @@ class Amity():
                 cprint('*'*60 + '\n')
                 for person in self.waiting_list['office']:
                     cprint(person.person_name, "yellow")
-                cprint("UNALLOCATED TO OFFICES...\n", 'cyan')
+                cprint("UNALLOCATED TO LIVINGSPACES...\n", 'cyan')
                 cprint('*'*60 + '\n')
                 for person in self.waiting_list['livingspace']:
                     cprint(person.person_name, "yellow")
@@ -471,3 +481,71 @@ class Amity():
             remove(path + db_file)
             cprint ("Database not found, Please check the name and try again!",
                     red)
+
+    def print_all_people(self, filename=None):
+        try:
+            if filename:
+                filepath = 'amity/files/' + filename + '.txt'
+                output_file = open(filepath, "w")
+                cprint("Printing to {}.txt..." .format(filename), 'white')
+                output_file.write('\t\t...STAFFS...\n')
+                for staff in self.all_people['staff']:
+                    output_file.write('\n\t' + staff.person_name + '  ' + "ID:" +    staff.person_id )
+                output_file.write('\n\n\t...FELLOWS...\n')
+                for fellow in self.all_people['fellow']:
+                    output_file.write('\n\t' + fellow.person_name + '  ' + "ID:" + fellow.person_id)
+                output_file.close()
+                cprint('\n\n\t***Done***', 'white')
+            else:
+                cprint('...staff...', 'cyan')
+                if self.all_people['staff']:
+                    # Print all staffs
+                    for staff in self.all_people['staff']:
+                        cprint(''.join(map(str, staff.person_name + '  ' +  "ID:" + staff.person_id )), 'cyan')
+                else:
+                    cprint("There are no staffs at the moment...", 'white')
+
+                cprint('%'*60, 'white')
+                cprint('...Fellow...', 'cyan')
+                if self.all_people['fellow']:
+                    # Print all fellows
+                    for fellow in self.all_people['fellow']:
+                        cprint(''.join(map(str, fellow.person_name + '  ' +  "ID:" + fellow.person_id)), 'cyan')
+                else:
+                    cprint("There are no fellows at the moment...", 'white')
+        except:
+            cprint('An error occurred.', 'red')
+
+    def print_all_rooms(self, filename=None):
+        try:
+            if filename:
+                filepath = 'amity/files/' + filename + '.txt'
+                output_file = open(filepath, "w")
+                cprint("Printing to {}.txt..." .format(filename), 'white')
+                output_file.write('\t\t...OFFICE...\n')
+                for office in self.all_rooms['office']:
+                    output_file.write('\n\t' + office.room_name + '\n')
+                output_file.write('\t\t...LIVING SPACE...\n')
+                for livingspace in self.all_rooms['livingspace']:
+                    output_file.write('\n\t' + livingspace.room_name + '\n')
+                output_file.close()
+                cprint('\n\n\t***Done***', 'white')
+            else:
+                cprint('...OFFICES...', 'cyan')
+                if self.all_rooms['office']:
+                    # Print all staffs
+                    for office in self.all_rooms['office']:
+                        cprint(''.join(map(str, office.room_name)), 'cyan')
+                else:
+                    cprint("There are no offices at the moment...", 'white')
+
+                cprint('%'*60, 'white')
+                cprint('...LIVING SPACES...', 'cyan')
+                if self.all_rooms['livingspace']:
+                    # Print all fellows
+                    for livingspace in self.all_rooms['livingspace']:
+                        cprint(''.join(map(str, livingspace.name)), 'cyan')
+                else:
+                    cprint("There are no living_spaces at the moment", 'white')
+        except:
+            print('An error occurred.')
