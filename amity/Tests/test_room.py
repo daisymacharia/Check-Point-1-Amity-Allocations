@@ -62,6 +62,8 @@ class TestPeople(unittest.TestCase):
                moved to the waiting list """
             self.amity.create_room('OFFICE', 'test_delete')
             self.amity.delete_room('test_delete')
+            for room in self.amity.all_rooms['office']:
+                self.assertNotIn("test_delete", room.room_name)
 
 
 if __name__ == '__main__':
