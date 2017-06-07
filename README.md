@@ -77,5 +77,5 @@ Also, if the person was not allocated previously, they will be allocated to the 
        $ DAISY MACHARIA has been reallocated successfully...
        
 These are some of the commands available in amity allocation. Below is a link to a Demo video for all the commands available.
-       
- https://asciinema.org/a/ecxomxe577yyx4rgvmlc20vho
+[![asciicast](https://asciinema.org/a/aji5ojsoazo3grjru8zx7igr5.png)](https://asciinema.org/a/aji5ojsoazo3grjru8zx7igr5)
+
