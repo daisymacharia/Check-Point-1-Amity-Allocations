@@ -75,3 +75,7 @@ Also, if the person was not allocated previously, they will be allocated to the 
 
        $ (Amity)reallocate_person F-4340879256 camelot
        $ DAISY MACHARIA has been reallocated successfully...
+       
+These are some of the commands available in amity allocation. Below is a link to a Demo video for all the commands available.
+       
+ https://asciinema.org/a/ecxomxe577yyx4rgvmlc20vho
