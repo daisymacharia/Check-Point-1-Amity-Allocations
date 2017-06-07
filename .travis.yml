@@ -9,6 +9,6 @@ install:
   - "pip install nose"
 script:
 # command to run tests
-  nosetests --with-cov --cov amity
+  nosetests --with-coverage
 after_success:
   - coveralls
