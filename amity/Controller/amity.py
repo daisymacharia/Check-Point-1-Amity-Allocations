@@ -291,7 +291,7 @@ class Amity():
                 for person in self.waiting_list['office']:
                     print_unallocated_file.write('\t' + person.person_name + ',')
                 print_unallocated_file.write('\n\n')
-                print_unallocated_file.write("UNALLOCATED TO LIVINGSPACES...\n")
+                print_unallocated_file.write("\n\nUNALLOCATED TO LIVINGSPACES...\n")
                 print_unallocated_file.write('*'*60 + '\n')
                 for person in self.waiting_list['livingspace']:
                     print_unallocated_file.write('\t' + person.person_name + ',')
@@ -303,7 +303,7 @@ class Amity():
                 cprint('*'*60 + '\n')
                 for person in self.waiting_list['office']:
                     cprint(person.person_name, "yellow")
-                cprint("UNALLOCATED TO LIVINGSPACES...\n", 'cyan')
+                cprint("\n UNALLOCATED TO LIVINGSPACES...\n", 'cyan')
                 cprint('*'*60 + '\n')
                 for person in self.waiting_list['livingspace']:
                     cprint(person.person_name, "yellow")
@@ -317,7 +317,7 @@ class Amity():
         members = [people for people in room[0].room_occupants]
         if room:
             if members:
-                cprint('{} NAME: {} \n'.format(room[0].room_type.upper(),
+                cprint('\n {} NAME: {} \n'.format(room[0].room_type.upper(),
                        room[0].room_name), "white")
                 cprint('*'*60, "cyan")
                 for person in members:
@@ -333,7 +333,7 @@ class Amity():
     def print_office_allocations(self):
         # checks if that the list has offices
             if self.all_rooms['office']:
-                cprint('OFFICES...\n', "white")
+                cprint('\n OFFICES...\n', "white")
                 for room in self.all_rooms['office']:
                     self.print_room(room.room_name)
             else:
@@ -342,7 +342,7 @@ class Amity():
     def print_livingspace_allocations(self):
         # checks if that the list has livingspaces
             if self.all_rooms['livingspace']:
-                cprint('LIVING SPACES...\n', "white")
+                cprint('\n LIVING SPACES...\n', "white")
                 for room in self.all_rooms['livingspace']:
                     self.print_room(room.room_name)
             else:
@@ -497,7 +497,7 @@ class Amity():
                 output_file.close()
                 cprint('\n\n\t***Done***', 'white')
             else:
-                cprint('...staff...', 'cyan')
+                cprint('\n...staff...', 'cyan')
                 if self.all_people['staff']:
                     # Print all staffs
                     for staff in self.all_people['staff']:
@@ -506,7 +506,7 @@ class Amity():
                     cprint("There are no staffs at the moment...", 'white')
 
                 cprint('%'*60, 'white')
-                cprint('...Fellow...', 'cyan')
+                cprint('\n...Fellow...', 'cyan')
                 if self.all_people['fellow']:
                     # Print all fellows
                     for fellow in self.all_people['fellow']:
@@ -531,7 +531,7 @@ class Amity():
                 output_file.close()
                 cprint('\n\n\t***Done***', 'white')
             else:
-                cprint('...OFFICES...', 'cyan')
+                cprint('\n...OFFICES...', 'cyan')
                 if self.all_rooms['office']:
                     # Print all staffs
                     for office in self.all_rooms['office']:
@@ -540,7 +540,7 @@ class Amity():
                     cprint("There are no offices at the moment...", 'white')
 
                 cprint('%'*60, 'white')
-                cprint('...LIVING SPACES...', 'cyan')
+                cprint('\n...LIVING SPACES...', 'cyan')
                 if self.all_rooms['livingspace']:
                     # Print all fellows
                     for livingspace in self.all_rooms['livingspace']:
